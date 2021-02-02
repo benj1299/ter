@@ -1,5 +1,8 @@
 version: "3.2"
 
+networks:
+  web-net:
+
 services:
   app:
     container_name: app
@@ -10,5 +13,16 @@ services:
     volumes: 
       - "./app:/usr/src/app"
     ports:
+      - "5001:5001"
+    restart: always
+
+  web:
+    container_name: web
+    build: ./web
+    volumes: 
+      - "./web:/app"
+    ports:
       - "5000:5000"
     restart: always
+    networks:
+        - web-net
