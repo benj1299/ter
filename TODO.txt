@@ -1,0 +1,3 @@
+Ressources :
+
+- https://stackoverflow.com/questions/4483502/edge-detection-techniques
