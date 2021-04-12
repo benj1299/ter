@@ -1,4 +1,4 @@
 scikit-learn
-freeze
 opencv-python
 matplotlib
+numpy

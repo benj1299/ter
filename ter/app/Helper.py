@@ -1,8 +1,12 @@
 import os
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 from math import *
+from sklearn.cluster import KMeans
+from sklearn.metrics import *
+import shutil
 
 class Helper:
 
@@ -17,7 +21,7 @@ class Helper:
         -------
         Numpy array of all images readed by OpenCV
 
-        """
+    """
     @staticmethod
     def load_images_from_folder(folder):
         images = []
@@ -25,7 +29,33 @@ class Helper:
             img = cv2.imread(os.path.join(folder,filename), 0) # Gray Color converting
             if img is not None:
                 images.append(img)
-        return np.array(images)
+        return np.array(images, dtype=object)
+
+    """ 
+        Supprime le contenu d'un dossier
+
+        Parameters
+        ----------
+        folder (string) : the folder's path
+    
+        Returns
+        -------
+
+    """
+    @staticmethod
+    def auto_remove_results(folder="./resultats"):
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            return
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
 
     """ 
         Bresenham's Algorithm
@@ -110,21 +140,17 @@ class Helper:
     """
     @staticmethod
     def GFD(image, m, n):
-        # preprocess the image
-        if len(image.shape) > 2:
-            image = image.max(axis = 2) / 255
-        width = image.shape[1]
-        N = width
+        N = image.shape[1]
         maxR = sqrt((((N)//2)**2) + (((N)//2)**2))
 
-        x = np.linspace(-(N-1)//2, (N-1)//2, N )
+        x = np.linspace(-(N-1)//2, (N-1)//2, N)
         y = x
         X, Y = np.meshgrid(x, y)
 
         radius = np.sqrt(np.power(X, 2) + np.power(Y, 2)) / maxR
 
         theta = np.arctan2(Y, X)
-        theta[theta < 0] = theta[theta < 0] + 2+ np.pi
+        theta[theta < 0] = theta[theta < 0] + (2 * np.pi)
 
         FR = np.zeros((m,n))
         FI = np.zeros((m,n))
@@ -133,18 +159,69 @@ class Helper:
         i = 0
         for rad in range(m):
             for ang in range(n):
-                # e^(i * theta) = cos(theta) + i * sin(theta)
-                # PF = FR + i * FI
-
-                tempR = image * np.cos(2 * np.pi * rad * radius + ang * theta)
-                tempI = image * np.sin(2 * np.pi * rad * radius + ang * theta)
+                tempR = image.dot(np.cos(2 * np.pi * rad * radius + ang * theta))
+                tempI = image.dot(np.sin(2 * np.pi * rad * radius + ang * theta))
                 FR[rad, ang] = np.sum(tempR)
                 FI[rad, ang] = np.sum(tempI)
                 
                 if rad == 0 and ang == 0:
                     FD[i] = sqrt((2* (FR[0,0] * FR[0,0]))) / (np.pi* maxR * maxR)
                 else:
-                    FD[i] = sqrt((FR[rad, ang] * FR[rad, ang]) + (FI[rad, ang] * FI[rad, ang])) / (math.sqrt((2* (FR[0,0] * FR[0,0]))))
+                    FD[i] = sqrt((FR[rad, ang] * FR[rad, ang]) + (FI[rad, ang] * FI[rad, ang])) / (sqrt((2* (FR[0,0] * FR[0,0]))))
                 i = i + 1
-
         return FD
+
+    """
+        Methode Elbow pour obtenir le nombre de cluster le plus optimal de Kmeans
+
+        Argument
+        --------
+        Model X à tester
+
+        Return
+        ------
+        Void
+    """
+    @staticmethod
+    def elbow_method(X):
+        inertia = []
+        K_range = range(1, 10)
+        for k in K_range:
+            model = KMeans(n_clusters=k).fit(X)
+            inertia.append(model.inertia_)
+        plt.plot(K_range, inertia)
+        plt.xlabel('nombre de clusters')
+        plt.ylabel('cout du model (inertia)')
+
+    """
+        Calcule la distance euclidienne de deux vecteurs
+
+        Argument
+        --------
+        Vecteurs
+
+        Return
+        ------
+        Distance en Float
+    """
+    @staticmethod
+    def euclidean_distance(vec1, vec2):
+        return np.sum(np.sqrt((vec1 - vec2)**2))
+
+    """
+        Calcule un contour pour définir si celui-ci est un triangle ou non
+
+        Argument
+        --------
+        Contour opencv d'une image
+
+        Return
+        ------
+        Vrai ou Faux
+    """
+    @staticmethod
+    def is_triangle(contour):
+            epsilon = 0.07 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            return len(approx) >= 3 and len(approx) <= 5

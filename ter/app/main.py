@@ -1,9 +1,10 @@
-from ter.app.Helper import Helper
+from Ia import Ia
+from Helper import Helper
 
-def launch():
-    # Load files from folder
-    # Extract ROI on each files
-    pass
+# Supprime les anciens résultats du dossier "resultats"
+Helper.auto_remove_results()
 
-def extract_roi(image):
-    pass
+# Lance l'intelligence artificielle
+ia = Ia("./datas")
+ia.extract_roi()
+ia.make_clustering()
