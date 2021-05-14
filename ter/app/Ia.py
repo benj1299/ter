@@ -10,7 +10,6 @@ from sklearn.metrics import *
 from pathlib import Path
 
 class Ia:
-
     def __init__(self, path):
         self.path = path
         self.descriptors = []

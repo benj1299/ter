@@ -55,7 +55,7 @@ class Helper:
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
             except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+                print('Problème de suppression %s. Raisonz: %s' % (file_path, e))
 
     """ 
         Bresenham's Algorithm
@@ -207,6 +207,198 @@ class Helper:
     @staticmethod
     def euclidean_distance(vec1, vec2):
         return np.sum(np.sqrt((vec1 - vec2)**2))
+
+    @staticmethod
+    def distance(a,b):
+        x1 = a[0]
+        x2 = b[0]
+        y1 = a[1]
+        y2 = b[1]
+        return sqrt((x1-x2)**2+(y1-y2)**2)
+
+    @staticmethod
+    def sumDistance(a,points):
+        sum = 0
+        for point in points:
+            sum += distance(a,point)
+        return sum
+
+    @staticmethod
+    def heron(a,b,c):
+        s = (a + b +c)/2 
+        try:
+            res = sqrt(s*(s-a)*(s-b)*(s-c))
+        except ValueError:
+            return 0
+        else:
+            return res
+
+    @staticmethod
+    def equaDist(a,b,c):
+        return (isclose(distance(a,b),distance(b,c),rel_tol = 0.07))
+
+    @staticmethod
+    def isIsoceles(points,nbrPoints = 3):
+        if(nbrPoints == 3):
+            a = points[0][0]
+            b = points[1][0]
+            c = points[2][0]
+            #on suppose qu'on aura 3 points en entrée
+            #isocele en b
+            if (equaDist(a,b,c) and not (equaDist(b,c,a))):
+                return True
+            #isocele en c
+            elif (equaDist(b,c,a) and not (equaDist(c,a,b))):
+                return True
+            #isocele en a
+            elif (equaDist(c,a,b) and not (equaDist(a,b,c))):
+                return True
+            else :
+                return False
+        elif(nbrPoints == 4):
+            l1 = points[1:4,0]   
+            sum_d1 = sumDistance(points[0][0],l1)
+
+            l2 = points[0:1,0]+points[2:4,0]
+            sum_d2 = sumDistance(points[1][0],l2)
+
+            l3 = points[0:2,0]+points[3:4,0]
+            sum_d3 = sumDistance(points[2][0],l3)
+
+            l4 = points[0:3,0]
+            sum_d4 = sumDistance(points[3][0],l4)
+            
+            dl = [sum_d1,sum_d2,sum_d3,sum_d4]
+
+            if(dl.index(min(dl)) == 0):
+                a = points[3][0]
+                b = points[1][0]
+                c = points[2][0]
+                #isocele en b
+                if (equaDist(a,b,c) and not (equaDist(b,c,a))):
+                    return True
+                #isocele en c
+                elif (equaDist(b,c,a) and not (equaDist(c,a,b))):
+                    return True
+                #isocele en a
+                elif (equaDist(c,a,b) and not (equaDist(a,b,c))):
+                    return True
+                else :
+                    return False
+
+            elif(dl.index(min(dl)) == 1):
+                a = points[0][0]
+                b = points[2][0]
+                c = points[3][0]
+                #isocele en b
+                if (equaDist(a,b,c) and not (equaDist(b,c,a))):
+                    return True
+                #isocele en c
+                elif (equaDist(b,c,a) and not (equaDist(c,a,b))):
+                    return True
+                #isocele en a
+                elif (equaDist(c,a,b) and not (equaDist(a,b,c))):
+                    return True
+                else :
+                    return False
+                
+            elif(dl.index(min(dl)) == 2):
+                a = points[0][0]
+                b = points[1][0]
+                c = points[3][0]
+                #isocele en b
+                if (equaDist(a,b,c) and not (equaDist(b,c,a))):
+                    return True
+                #isocele en c
+                elif (equaDist(b,c,a) and not (equaDist(c,a,b))):
+                    return True
+                #isocele en a
+                elif (equaDist(c,a,b) and not (equaDist(a,b,c))):
+                    return True
+                else :
+                    return False
+
+            elif(dl.index(min(dl)) == 3):
+                a = points[0][0]
+                b = points[1][0]
+                c = points[2][0]
+                #isocele en b
+                if (equaDist(a,b,c) and not (equaDist(b,c,a))):
+                    return True
+                #isocele en c
+                elif (equaDist(b,c,a) and not (equaDist(c,a,b))):
+                    return True
+                #isocele en a
+                elif (equaDist(c,a,b) and not (equaDist(a,b,c))):
+                    return True
+                else :
+                    return False
+            else :
+                print("Error")
+                return False
+        else :
+            print("Error")
+            return False    
+
+    @staticmethod
+    def heronPoints(points,nbrPoints = 3):
+        #on suppose qu'on aura 3 points en entrée
+        if(nbrPoints == 3):
+            d1 = distance(points[0][0],points[1][0])
+            d2 = distance(points[1][0],points[2][0])
+            d3 = distance(points[2][0],points[0][0])
+
+            return heron(d1,d2,d3)   
+        
+        #on suppose qu'on aura 4 points en entrée
+        elif(nbrPoints == 4):
+            l1 = points[1:4,0]   
+            sum_d1 = sumDistance(points[0][0],l1)
+
+            l2 = points[0:1,0]+points[2:4,0]
+            sum_d2 = sumDistance(points[1][0],l2)
+
+            l3 = points[0:2,0]+points[3:4,0]
+            sum_d3 = sumDistance(points[2][0],l3)
+
+            l4 = points[0:3,0]
+            sum_d4 = sumDistance(points[3][0],l4)
+
+            dl = [sum_d1,sum_d2,sum_d3,sum_d4]
+
+            if(dl.index(min(dl)) == 0):
+                d1 = distance(points[1][0],points[2][0])
+                d2 = distance(points[2][0],points[3][0])
+                d3 = distance(points[3][0],points[1][0])
+
+                return heron(d1,d2,d3)
+
+            elif(dl.index(min(dl)) == 1):
+                d1 = distance(points[0][0],points[2][0])
+                d2 = distance(points[2][0],points[3][0])
+                d3 = distance(points[3][0],points[0][0])
+
+                return heron(d1,d2,d3)
+
+            elif(dl.index(min(dl)) == 2):
+                d1 = distance(points[0][0],points[1][0])
+                d2 = distance(points[1][0],points[3][0])
+                d3 = distance(points[3][0],points[0][0])
+
+                return heron(d1,d2,d3)
+
+            elif(dl.index(min(dl)) == 3):
+                d1 = distance(points[0][0],points[1][0])
+                d2 = distance(points[1][0],points[2][0])
+                d3 = distance(points[2][0],points[0][0])
+
+                return heron(d1,d2,d3)
+            else :
+                print("Error")
+                return -1
+        else :
+            print("Error")
+            return -1
 
     """
         Calcule un contour pour définir si celui-ci est un triangle ou non
