@@ -1,0 +1,15 @@
+version: "3.2"
+
+networks:
+  web-net:
+
+services:
+  app:
+    container_name: app
+    build: ./app
+    entrypoint: /bin/sh
+    stdin_open: true
+    tty: true
+    volumes: 
+      - "./app:/usr/src/app"
+    restart: always
